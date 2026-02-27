@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { supabase } from "../../lib/supabase";
-const { data: { user } } = await supabase.auth.getUser();
+ const { data: { user } } = await supabase.auth.getUser();
 // Динамически импортируем мини-карту (чтобы не было ошибки SSR)
 const LocationPicker = dynamic(() => import("../../components/LocationPicker"), {
   ssr: false,

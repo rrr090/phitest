@@ -1,3 +1,4 @@
+// app/issue/[id]/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -6,10 +7,25 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { Issue } from "@/lib/types";
 
+function StatusBadge({ status }: { status: string }) {
+  const map: Record<string, { bg: string; color: string }> = {
+    "Решено":    { bg: "var(--status-done-bg)",  color: "var(--status-done)" },
+    "В работе":  { bg: "var(--status-wip-bg)",   color: "var(--status-wip)" },
+    "Открыто":   { bg: "var(--status-open-bg)",  color: "var(--status-open)" },
+    "Отклонено": { bg: "rgba(160,133,110,0.10)", color: "var(--text-muted)" },
+  };
+  const s = map[status] || map["Открыто"];
+  return (
+    <span className="px-4 py-2 rounded-full text-sm font-bold" style={{ background: s.bg, color: s.color }}>
+      {status}
+    </span>
+  );
+}
+
 export default function IssueDetailPage() {
   const params = useParams();
   const router = useRouter();
-  
+
   const [issue, setIssue] = useState<Issue | null>(null);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [hasLiked, setHasLiked] = useState(false);
@@ -20,42 +36,27 @@ export default function IssueDetailPage() {
     async function loadData() {
       setIsLoading(true);
       try {
-        // 1. Получаем текущего пользователя
         const { data: { user } } = await supabase.auth.getUser();
         setCurrentUser(user);
 
-        // 2. Получаем данные о проблеме
         const { data: issueData, error: issueError } = await supabase
-          .from("issues")
-          .select("*")
-          .eq("id", params.id)
-          .single();
+          .from("issues").select("*").eq("id", params.id).single();
 
-        if (issueError || !issueData) {
-          setError(true);
-          return;
-        }
+        if (issueError || !issueData) { setError(true); return; }
         setIssue(issueData);
 
-        // 3. Если пользователь залогинен, проверяем ставил ли он лайк
         if (user) {
           const { data: likeData } = await supabase
-            .from("likes")
-            .select("*")
-            .eq("user_id", user.id)
-            .eq("issue_id", params.id)
-            .single();
-          
+            .from("likes").select("*")
+            .eq("user_id", user.id).eq("issue_id", params.id).single();
           if (likeData) setHasLiked(true);
         }
       } catch (err) {
-        console.error("Error loading page:", err);
         setError(true);
       } finally {
         setIsLoading(false);
       }
     }
-
     if (params.id) loadData();
   }, [params.id]);
 
@@ -63,114 +64,149 @@ export default function IssueDetailPage() {
     if (!currentUser) return alert("Войдите, чтобы поддержать проблему");
     if (hasLiked || !issue) return;
 
-    // 1. Добавляем запись в таблицу likes
     const { error: likeError } = await supabase
-      .from("likes")
-      .insert([{ user_id: currentUser.id, issue_id: issue.id }]);
+      .from("likes").insert([{ user_id: currentUser.id, issue_id: issue.id }]);
 
     if (likeError) {
-      if (likeError.code === '23505') setHasLiked(true); // Уже лайкнуто (защита БД)
+      if (likeError.code === "23505") setHasLiked(true);
       else alert("Ошибка при сохранении лайка");
       return;
     }
 
-    // 2. Увеличиваем счетчик в таблице issues через RPC
-    const { error: updateError } = await supabase
-      .rpc('increment_likes', { row_id: issue.id });
-
+    const { error: updateError } = await supabase.rpc("increment_likes", { row_id: issue.id });
     if (!updateError) {
       setHasLiked(true);
-      setIssue(prev => prev ? { ...prev, likes_count: (prev.likes_count || 0) + 1 } : null);
-    } else {
-      console.error("RPC Error:", updateError);
+      setIssue((prev) => prev ? { ...prev, likes_count: (prev.likes_count || 0) + 1 } : null);
     }
   };
 
   if (isLoading) {
     return (
-      <div className="h-full flex items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="h-full flex items-center justify-center" style={{ background: "var(--bg-elevated)" }}>
+        {/* [UI] Спиннер в цвете тёрракота */}
+        <div className="w-12 h-12 rounded-full border-2 border-transparent animate-spin"
+          style={{ borderTopColor: "var(--accent-amber)" }} />
       </div>
     );
   }
 
   if (error || !issue) {
     return (
-      <div className="h-full flex flex-col items-center justify-center bg-gray-50 p-6 text-center">
+      <div className="h-full flex flex-col items-center justify-center p-6 text-center" style={{ background: "var(--bg-elevated)" }}>
         <span className="text-6xl mb-4">🔍</span>
-        <h2 className="text-2xl font-bold text-gray-900">Проблема не найдена</h2>
-        <p className="text-gray-500 mt-2 mb-6">Возможно, она была удалена или ссылка неверна.</p>
-        <Link href="/" className="text-blue-600 font-medium hover:underline">Вернуться на карту</Link>
+        <h2 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>Проблема не найдена</h2>
+        <p className="mt-2 mb-6" style={{ color: "var(--text-muted)" }}>Возможно, она была удалена или ссылка неверна.</p>
+        <Link href="/" style={{ color: "var(--accent-amber)" }} className="font-medium">Вернуться на карту</Link>
       </div>
     );
   }
 
   return (
-    <div className="h-full overflow-y-auto bg-gray-50 p-4 md:p-8">
+    <div className="h-full overflow-y-auto p-4 md:p-8" style={{ background: "var(--bg-elevated)" }}>
       <div className="max-w-4xl mx-auto">
-        <button 
+        {/* [UI] Кнопка назад с hover-сдвигом */}
+        <button
           onClick={() => router.back()}
-          className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors mb-6 group"
+          className="flex items-center gap-2 mb-6 text-sm font-medium transition-all group animate-fade-up"
+          style={{ color: "var(--text-muted)", background: "none", border: "none", cursor: "pointer" }}
+          onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "var(--text-primary)")}
+          onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "var(--text-muted)")}
         >
-          <span className="group-hover:-translate-x-1 transition-transform">←</span> Назад
+          <span className="transition-transform group-hover:-translate-x-1 inline-block">←</span> Назад
         </button>
 
-        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-          {/* ФОТО */}
-          <div className="w-full h-64 md:h-96 bg-gray-200 relative">
+        {/* [UI] Главная карточка — кремовая поверхность */}
+        <div
+          className="rounded-3xl overflow-hidden animate-scale-in"
+          style={{ background: "var(--card-bg)", border: "1px solid var(--card-border)", boxShadow: "var(--card-shadow)" }}
+        >
+          {/* Фото */}
+          <div className="w-full h-64 md:h-96 relative overflow-hidden">
             {issue.image_url ? (
               <img src={issue.image_url} alt={issue.title} className="w-full h-full object-cover" />
             ) : (
-              <div className="w-full h-full flex flex-col items-center justify-center text-gray-400">
+              <div className="w-full h-full flex flex-col items-center justify-center" style={{ background: "#e8e0d4", color: "#c4a98a" }}>
                 <span className="text-6xl">🖼️</span>
-                <p className="mt-2">Фотография не приложена</p>
+                <p className="mt-2 text-sm">Фотография не приложена</p>
               </div>
             )}
             <div className="absolute top-4 right-4">
-              <span className={`px-4 py-2 rounded-full text-sm font-bold shadow-lg text-white ${
-                issue.status === 'Решено' ? 'bg-green-500' : 
-                issue.status === 'В работе' ? 'bg-yellow-500' : 'bg-red-500'
-              }`}>
-                {issue.status}
-              </span>
+              <StatusBadge status={issue.status} />
             </div>
           </div>
 
           <div className="p-6 md:p-10">
-            <div className="flex flex-wrap items-center gap-3 mb-4 text-sm text-gray-400">
-              <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-lg text-xs font-bold uppercase">
+            {/* Мета */}
+            <div className="flex flex-wrap items-center gap-3 mb-4 animate-fade-up" style={{ color: "var(--text-muted)" }}>
+              <span
+                className="px-3 py-1 rounded-full text-xs font-bold"
+                style={{ background: "var(--accent-sky-bg)", color: "var(--accent-sky)" }}
+              >
                 {issue.category}
               </span>
-              <span>ID: #{issue.id.slice(0, 8)}</span>
+              <span className="text-sm">ID: #{issue.id.slice(0, 8)}</span>
               <span>•</span>
-              <span>{new Date(issue.created_at).toLocaleDateString('ru-RU')}</span>
+              <span className="text-sm">{new Date(issue.created_at).toLocaleDateString("ru-RU")}</span>
             </div>
 
-            <h1 className="text-3xl font-black text-gray-900 mb-6">{issue.title}</h1>
+            <h1
+              className="text-4xl font-bold mb-8 animate-fade-up delay-1"
+              style={{ fontFamily: "var(--font-display)", color: "var(--text-primary)", lineHeight: 1.15 }}
+            >
+              {issue.title}
+            </h1>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-fade-up delay-2">
               <div className="lg:col-span-2 space-y-6">
                 <div>
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">Описание</h3>
-                  <p className="text-gray-600 leading-relaxed whitespace-pre-wrap">{issue.description}</p>
+                  <h3 className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: "var(--text-muted)" }}>
+                    Описание
+                  </h3>
+                  <p className="leading-relaxed whitespace-pre-wrap" style={{ color: "var(--text-secondary)" }}>
+                    {issue.description}
+                  </p>
                 </div>
-                <div className="p-5 bg-gray-50 rounded-2xl border border-gray-100">
-                  <h3 className="text-sm font-bold text-gray-400 uppercase mb-3">Местоположение</h3>
-                  <p className="text-gray-900 font-medium">📍 {issue.address || "Адрес не указан"}</p>
+                <div
+                  className="p-5 rounded-2xl"
+                  style={{ background: "rgba(100,70,40,0.04)", border: "1px solid rgba(100,70,40,0.07)" }}
+                >
+                  <h3 className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: "var(--text-muted)" }}>
+                    Местоположение
+                  </h3>
+                  <p className="font-medium" style={{ color: "var(--text-primary)" }}>
+                    📍 {issue.address || "Адрес не указан"}
+                  </p>
                 </div>
               </div>
 
-              <div className="bg-blue-600 p-6 rounded-2xl text-white shadow-xl h-fit">
-                <p className="text-blue-100 text-sm mb-1">Поддержали проблему</p>
-                <div className="text-3xl font-bold mb-4">{issue.likes_count || 0} чел.</div>
-                <button 
+              {/* [UI] Блок лайков — тёплый кофейный фон */}
+              <div
+                className="p-6 rounded-2xl text-center"
+                style={{ background: "var(--bg-base)", border: "1px solid rgba(100,70,40,0.10)" }}
+              >
+                <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: "var(--text-muted)" }}>
+                  Поддержали проблему
+                </p>
+                <div
+                  className="text-4xl font-black mb-5"
+                  style={{ fontFamily: "var(--font-display)", color: "var(--text-primary)" }}
+                >
+                  {issue.likes_count || 0}
+                  <span className="text-sm font-normal ml-1" style={{ color: "var(--text-muted)" }}>чел.</span>
+                </div>
+                {/* [UI] CTA — тёрракотовая кнопка-pill */}
+                <button
                   onClick={handleLike}
                   disabled={hasLiked}
-                  className={`w-full font-bold py-3 rounded-xl transition-all shadow-sm ${
-                    hasLiked 
-                      ? "bg-blue-400 cursor-default" 
-                      : "bg-white text-blue-600 hover:bg-blue-50"
-                  }`}
+                  className="w-full py-3 rounded-xl font-bold text-sm transition-all"
+                  style={{
+                    background: hasLiked ? "rgba(100,70,40,0.07)" : "var(--accent-amber)",
+                    color: hasLiked ? "var(--text-muted)" : "#fff",
+                    cursor: hasLiked ? "default" : "pointer",
+                    border: "none",
+                  }}
+                  onMouseEnter={(e) => { if (!hasLiked) (e.currentTarget as HTMLElement).style.opacity = "0.88"; }}
+                  onMouseLeave={(e) => { if (!hasLiked) (e.currentTarget as HTMLElement).style.opacity = "1"; }}
                 >
                   {hasLiked ? "✅ Вы поддержали" : "🙌 Поддержать"}
                 </button>

@@ -1,4 +1,6 @@
+// app/login/page.tsx
 "use client";
+
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
@@ -26,28 +28,92 @@ export default function LoginPage() {
     setLoading(false);
   };
 
+  const inputBase = {
+    background: "rgba(100,70,40,0.05)",
+    border: "1px solid rgba(100,70,40,0.10)",
+    color: "var(--text-primary)",
+    fontFamily: "var(--font-body)",
+    borderRadius: "var(--radius-lg)",
+    padding: "14px 16px",
+    width: "100%",
+    fontSize: "14px",
+    outline: "none",
+    transition: "border-color 0.15s",
+  };
+
   return (
-    <div className="h-full flex items-center justify-center bg-gray-50 p-6">
-      <div className="max-w-md w-full bg-white p-8 rounded-3xl shadow-xl border border-gray-100">
-        <h1 className="text-2xl font-black mb-6 text-center">Вход в Smart City</h1>
+    <div className="h-full flex items-center justify-center p-6" style={{ background: "var(--bg-elevated)" }}>
+      {/* [UI] Логин карточка — кремовая с кофейными тенями */}
+      <div
+        className="max-w-md w-full p-10 rounded-3xl animate-scale-in"
+        style={{
+          background: "var(--card-bg)",
+          border: "1px solid var(--card-border)",
+          boxShadow: "0 24px 60px rgba(100,70,40,0.12)",
+        }}
+      >
+        <div className="text-center mb-10">
+          {/* [UI] Карамельный pill-лейбл */}
+          <div
+            className="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-5"
+            style={{ background: "var(--accent-caramel-bg)", color: "var(--accent-amber)" }}
+          >
+            Smart City
+          </div>
+          <h1
+            className="text-3xl font-bold"
+            style={{ fontFamily: "var(--font-display)", color: "var(--text-primary)" }}
+          >
+            Добро пожаловать
+          </h1>
+          <p className="text-sm mt-2" style={{ color: "var(--text-muted)" }}>
+            Войдите, чтобы продолжить
+          </p>
+        </div>
+
         <form onSubmit={handleLogin} className="space-y-4">
-          <input 
+          <input
             type="email" placeholder="Email" required
-            className="w-full p-4 bg-gray-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-blue-500"
+            style={inputBase}
             value={email} onChange={(e) => setEmail(e.target.value)}
+            onFocus={(e) => ((e.target as HTMLInputElement).style.borderColor = "var(--accent-amber)")}
+            onBlur={(e) => ((e.target as HTMLInputElement).style.borderColor = "rgba(100,70,40,0.10)")}
           />
-          <input 
+          <input
             type="password" placeholder="Пароль" required
-            className="w-full p-4 bg-gray-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-blue-500"
+            style={inputBase}
             value={password} onChange={(e) => setPassword(e.target.value)}
+            onFocus={(e) => ((e.target as HTMLInputElement).style.borderColor = "var(--accent-amber)")}
+            onBlur={(e) => ((e.target as HTMLInputElement).style.borderColor = "rgba(100,70,40,0.10)")}
           />
-          <button disabled={loading} className="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl hover:bg-blue-700 transition-all">
+          {/* [UI] Тёрракотовая CTA кнопка */}
+          <button
+            type="submit" disabled={loading}
+            className="w-full py-4 rounded-2xl font-bold text-sm transition-all"
+            style={{
+              background: loading ? "rgba(193,122,74,0.5)" : "var(--accent-amber)",
+              color: "#fff",
+              border: "none",
+              cursor: loading ? "not-allowed" : "pointer",
+            }}
+            onMouseEnter={(e) => { if (!loading) (e.currentTarget as HTMLElement).style.opacity = "0.88"; }}
+            onMouseLeave={(e) => { if (!loading) (e.currentTarget as HTMLElement).style.opacity = "1"; }}
+          >
             {loading ? "Загрузка..." : "Войти"}
           </button>
         </form>
-        <button onClick={handleSignUp} className="w-full mt-4 text-sm text-gray-500 hover:text-blue-600 font-medium">
-          Нет аккаунта? Зарегистрироваться
-        </button>
+
+        <div className="mt-4 pt-4 text-center" style={{ borderTop: "1px solid rgba(100,70,40,0.08)" }}>
+          <button
+            onClick={handleSignUp}
+            className="text-sm font-medium transition-colors"
+            style={{ color: "var(--text-muted)", background: "none", border: "none", cursor: "pointer" }}
+            onMouseEnter={(e) => ((e.target as HTMLElement).style.color = "var(--accent-amber)")}
+            onMouseLeave={(e) => ((e.target as HTMLElement).style.color = "var(--text-muted)")}
+          >
+            Нет аккаунта? Зарегистрироваться
+          </button>
+        </div>
       </div>
     </div>
   );

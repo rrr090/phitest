@@ -1,55 +1,90 @@
-// app/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import { supabase } from "../lib/supabase";
-import { Issue } from "../lib/types"; // Импортируем наш тип!
+import { supabase } from "@/lib/supabase";
+import { Issue } from "@/lib/types";
 
-// Динамический импорт карты (отключаем SSR для Leaflet)
-const MapComponent = dynamic(() => import("../components/MapComponent"), {
-  ssr: false,
-  loading: () => (
-    <div className="flex h-full items-center justify-center bg-gray-50 text-gray-500">
-      <div className="animate-pulse flex flex-col items-center gap-3">
-        <span className="text-4xl">🗺️</span>
-        <span className="font-medium text-lg">Загрузка карты Петропавловска...</span>
-      </div>
-    </div>
-  ),
-});
+// Динамический импорт карты (чтобы не было ошибок SSR)
+const Map = dynamic(() => import("@/components/Map"), { ssr: false });
 
-export default function HomePage() {
-  const [dbStatus, setDbStatus] = useState("Подключение к БД...");
-  const [issuesData, setIssuesData] = useState<Issue[]>([]);
+export default function Home() {
+  const [issues, setIssues] = useState<Issue[]>([]);
+  const [filteredIssues, setFilteredIssues] = useState<Issue[]>([]);
+  const [activeCategory, setActiveCategory] = useState("Все");
+  const [activeStatus, setActiveStatus] = useState("Все");
+
+  const categories = ["Все", "Дороги", "Освещение", "ЖКХ", "Мусор", "Другое"];
+  const statuses = ["Все", "Открыто", "В работе", "Решено"];
 
   useEffect(() => {
     async function fetchIssues() {
-      // 🚀 Теперь запрашиваем данные из новой таблицы issues!
-      const { data, error } = await supabase.from("issues").select("*");
-      
-      if (error) {
-        setDbStatus("❌ Ошибка соединения");
-        console.error("Ошибка Supabase:", error);
-      } else {
-        setDbStatus(`✅ Найдено проблем: ${data?.length || 0}`);
-        setIssuesData(data as Issue[]);
+      const { data } = await supabase.from("issues").select("*");
+      if (data) {
+        setIssues(data);
+        setFilteredIssues(data);
       }
     }
-    
     fetchIssues();
   }, []);
 
+  // Логика фильтрации
+  useEffect(() => {
+    let result = issues;
+
+    if (activeCategory !== "Все") {
+      result = result.filter(iss => iss.category === activeCategory);
+    }
+
+    if (activeStatus !== "Все") {
+      result = result.filter(iss => iss.status === activeStatus);
+    }
+
+    setFilteredIssues(result);
+  }, [activeCategory, activeStatus, issues]);
+
   return (
-    <div className="h-full w-full relative">
-      {/* Плавающий бейдж статуса */}
-      <div className="absolute top-4 left-4 z-[400] bg-white/90 backdrop-blur-md px-4 py-2 rounded-xl shadow-md border border-gray-200 text-sm font-medium flex items-center gap-2 transition-all">
-        <div className={`w-2 h-2 rounded-full ${dbStatus.includes("✅") ? "bg-green-500 animate-pulse" : "bg-red-500"}`}></div>
-        {dbStatus}
+    <div className="relative h-full w-full">
+      {/* ПАНЕЛЬ ФИЛЬТРОВ (Плавающая поверх карты) */}
+      <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] w-[90%] max-w-2xl">
+        <div className="bg-white/80 backdrop-blur-md p-4 rounded-3xl shadow-2xl border border-white/20 space-y-3">
+          
+          {/* Категории */}
+          <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+            {categories.map(cat => (
+              <button
+                key={cat}
+                onClick={() => setActiveCategory(cat)}
+                className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap ${
+                  activeCategory === cat 
+                    ? "bg-blue-600 text-white shadow-lg shadow-blue-200" 
+                    : "bg-white text-gray-500 hover:bg-gray-100"
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+
+          {/* Статусы */}
+          <div className="flex gap-4 border-t border-gray-100 pt-3">
+            {statuses.map(stat => (
+              <button
+                key={stat}
+                onClick={() => setActiveStatus(stat)}
+                className={`text-xs font-black uppercase tracking-widest transition-colors ${
+                  activeStatus === stat ? "text-blue-600" : "text-gray-400 hover:text-gray-600"
+                }`}
+              >
+                {stat === "Все" ? "Все статусы" : stat}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
-      
-      {/* Передаем загруженные проблемы (issues) в компонент карты */}
-      <MapComponent data={issuesData} />
+
+      {/* КАРТА */}
+      <Map issues={filteredIssues} />
     </div>
   );
 }
