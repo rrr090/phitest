@@ -1,11 +1,21 @@
 // app/layout.tsx
+import type { Viewport } from "next";
 import Sidebar from "@/components/Sidebar";
 import "./globals.css";
 
-// ─── МЕТАДАННЫЕ (не изменены) ─────────────────────────────────────────────────
+// ─── МЕТАДАННЫЕ ───────────────────────────────────────────────────────────────
 export const metadata = {
   title: "Smart City Петропавловск",
   description: "Платформа для мониторинга городских проблем",
+};
+
+// ─── НАСТРОЙКИ ЭКРАНА ДЛЯ МОБИЛОК ─────────────────────────────────────────────
+// Запрещаем зум при клике на инпуты (особенно бесит на iOS) и фиксируем ширину
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false, 
 };
 
 export default function RootLayout({
@@ -15,39 +25,25 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ru">
-      {/*
-        UI: удалён inline-класс bg-gray-50 — фон теперь контролируется
-        через CSS-переменную --color-base в globals.css.
-        Шрифт подключён через @import в globals.css (Manrope).
-      */}
       <body>
-
-        {/*
-          UI: flex-контейнер на всю высоту.
-          - bg-gray-50 → var(--color-base) тёмная подложка
-          - text-gray-900 → var(--text-hi) светлый текст
-          - overflow-hidden сохранён — скролл будет внутри <main>
-        */}
         <div
-          className="flex h-screen w-full overflow-hidden"
+          /*
+            UI АДАПТАЦИЯ ДЛЯ ТЕЛЕФОНОВ:
+            1. h-[100dvh] вместо h-screen — динамическая высота. Учитывает 
+               выплывающую строку браузера на iOS/Android (Safari/Chrome).
+            2. flex-col-reverse — на мобилках контент (<main>) будет сверху, 
+               а <Sidebar> упадет вниз (как Bottom Navigation).
+            3. md:flex-row — на планшетах и ПК возвращаем стандартный вид 
+               (Сайдбар слева, контент справа).
+          */
+          className="flex flex-col-reverse md:flex-row h-[100dvh] w-full overflow-hidden"
           style={{ background: "var(--color-base)", color: "var(--text-hi)" }}
         >
 
-          {/* Сайдбар — DOM/ширина/поведение не изменены */}
+          {/* Сайдбар (на мобилках будет внизу, на ПК — слева) */}
           <Sidebar />
 
-          {/*
-            UI: <main> теперь тёмный, совпадает с общей подложкой.
-            overflow-y: auto внутри main — каждая страница сама
-            управляет скроллом через .page-content из globals.css.
-            
-            Каждая page.tsx должна оборачивать контент в:
-              <div className="page-content"> ... </div>
-            или
-              <div className="page-content-sm"> ... </div>
-            
-            Это обеспечивает единые отступы и скролл на всех страницах.
-          */}
+          {/* Контентная часть */}
           <main
             className="flex-1 relative overflow-hidden"
             style={{ background: "var(--color-base)" }}
