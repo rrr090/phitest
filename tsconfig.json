@@ -1,9 +1,13 @@
 {
   "compilerOptions": {
-    "target": "ES2017",
+    "skipLibCheck": true, // Это заставит TS игнорировать ошибки в папке node_modules
+    "typeRoots": ["./node_modules/@types"], // Явно указываем, где искать типы
+    "types": ["node"], // Ограничиваем автоматический поиск типов только необходимыми
+    
+    // Остальные твои настройки...
+    "target": "ESNext",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
-    "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
     "esModuleInterop": true,
@@ -11,7 +15,7 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "react-jsx",
+    "jsx": "preserve",
     "incremental": true,
     "plugins": [
       {
@@ -22,13 +26,6 @@
       "@/*": ["./*"]
     }
   },
-  "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts",
-    "**/*.mts"
-  ],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
   "exclude": ["node_modules"]
 }
