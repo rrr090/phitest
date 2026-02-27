@@ -1,0 +1,1 @@
+hackaton 28.02.2026 Hackatonis 4.0
