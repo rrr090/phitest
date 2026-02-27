@@ -97,7 +97,7 @@ export default function Map({ issues }: MapProps) {
     <div className="relative w-full h-full">
       
       {/* ПЕРЕКЛЮЧАТЕЛЬ СЛОЕВ (Справа внизу) */}
-      <div className="absolute bottom-8 right-6 z-[1000] bg-white/90 backdrop-blur-md rounded-2xl shadow-2xl p-1.5 flex gap-1 border border-white/20">
+      <div className="absolute top-8 right-6 z-[1000] bg-white/90 backdrop-blur-md rounded-2xl shadow-2xl p-1.5 flex gap-1 border border-white/20">
         <button
           onClick={() => handleToggleEcology(false)}
           className={`px-5 py-2.5 text-xs font-black uppercase tracking-wider rounded-xl transition-all ${

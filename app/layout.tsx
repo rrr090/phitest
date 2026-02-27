@@ -23,15 +23,20 @@ export default function RootLayout({
     <html lang="ru">
       <body>
         <div
-          // flex-col для мобилок (Шапка сверху), md:flex-row для ПК (Сайдбар слева)
           className="flex flex-col md:flex-row h-[100dvh] w-full overflow-hidden"
-          style={{ background: "var(--color-base)", color: "var(--text-hi)" }}
+          style={{ background: "#0E0F14", color: "#F0F1F5" }}
         >
-          {/* Наш умный компонент навигации */}
           <Sidebar />
 
-          {/* Основной контент */}
-          <main className="flex-1 relative overflow-hidden" style={{ background: "var(--color-base)" }}>
+          {/* 
+            На мобилках: Sidebar рендерит mobile header (h-16) + bottom nav (h-16).
+            main должен занять оставшуюся высоту между ними.
+            На ПК: flex-1 relative как обычно.
+          */}
+          <main className="flex-1 relative w-full overflow-hidden
+            /* Мобилка: учитываем высоту нижней навбара (64px) */
+            pb-16 md:pb-0
+          ">
             {children}
           </main>
         </div>

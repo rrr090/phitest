@@ -3,20 +3,29 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
-// ─── ЛОГИКА НЕ ИЗМЕНЕНА ─────────────────────────────────────────────────────
+// ─── НАВИГАЦИЯ ───────────────────────────────────────────────────────────────
 const navItems = [
+  { href: "/",       icon: <IconMap />,      label: "Карта"         },
+  { href: "/feed",       icon: <IconFeed />,     label: "Лента"         },
+  { href: "/issue",      icon: <IconIssue />,    label: "Сигнал", cta: true },
+  { href: "/categories", icon: <IconCatalog />,  label: "Каталог"       },
+  { href: "/ratings",    icon: <IconRating />,   label: "Рейтинг"       },
+];
+
+const sidebarNavItems = [
   { href: "/",       icon: <IconMap />,      label: "Карта"          },
   { href: "/feed",       icon: <IconFeed />,     label: "Лента проблем"  },
   { href: "/categories", icon: <IconCatalog />,  label: "Каталог"        },
   { href: "/ratings",    icon: <IconRating />,   label: "Рейтинг"        },
   { href: "/issue",      icon: <IconIssue />,    label: "Новый сигнал"   },
 ];
+
 const bottomItems = [
   { href: "/profile", icon: <IconProfile />, label: "Личный кабинет" },
   { href: "/admin",   icon: <IconAdmin />,   label: "Админ-панель"   },
 ];
 
-// ─── SVG ИКОНКИ (inline, без внешних зависимостей) ──────────────────────────
+// ─── SVG ИКОНКИ ──────────────────────────────────────────────────────────────
 function IconMap() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
@@ -79,23 +88,22 @@ function IconAdmin() {
     </svg>
   );
 }
-// Новые иконки для мобильного меню
-function IconMenu() {
+function IconClose() {
   return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
       stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="3" y1="12" x2="21" y2="12"></line>
-      <line x1="3" y1="6" x2="21" y2="6"></line>
-      <line x1="3" y1="18" x2="21" y2="18"></line>
+      <line x1="18" y1="6" x2="6" y2="18"/>
+      <line x1="6" y1="6" x2="18" y2="18"/>
     </svg>
   );
 }
-function IconClose() {
+function IconMore() {
   return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="18" y1="6" x2="6" y2="18"></line>
-      <line x1="6" y1="6" x2="18" y2="18"></line>
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="5" r="1" fill="currentColor"/>
+      <circle cx="12" cy="12" r="1" fill="currentColor"/>
+      <circle cx="12" cy="19" r="1" fill="currentColor"/>
     </svg>
   );
 }
@@ -103,13 +111,11 @@ function IconClose() {
 // ─── SIDEBAR ─────────────────────────────────────────────────────────────────
 export default function Sidebar() {
   const pathname = usePathname();
-  const [isOpen, setIsOpen] = useState(false); // Состояние мобильного меню
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   return (
     <>
-      {/* UI: design tokens, локальные для сайдбара */}
       <style>{`
-        /* UI: Phamily-style tokens */
         .sc-sidebar {
           --sb-bg:          #0E0F14;
           --sb-surface:     #181920;
@@ -224,157 +230,243 @@ export default function Sidebar() {
           transform: translateY(-1px);
         }
         .sc-cta-item:active { transform: translateY(0); }
+
+        /* ─── НИЖНЯЯ НАВБАРА (мобилка) ─── */
+        .sc-bottom-nav {
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          height: 64px;
+          z-index: 9990;
+          /* ИЗМЕНЕНО: удалено display: flex; чтобы Tailwind мог управлять видимостью */
+          align-items: stretch;
+          background: rgba(14,15,20,0.95);
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
+          border-top: 1px solid rgba(255,255,255,0.07);
+          padding-bottom: env(safe-area-inset-bottom);
+        }
+        .sc-bn-item {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 4px;
+          text-decoration: none;
+          color: #4E5162;
+          font-size: 10px;
+          font-weight: 600;
+          letter-spacing: 0.03em;
+          transition: color 140ms ease;
+          position: relative;
+          padding: 0 4px;
+        }
+        .sc-bn-item.active {
+          color: #C8F04B;
+        }
+        .sc-bn-item.active::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 20%;
+          right: 20%;
+          height: 2px;
+          background: #C8F04B;
+          border-radius: 0 0 3px 3px;
+        }
+        .sc-bn-cta {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          text-decoration: none;
+          gap: 0;
+        }
+        .sc-bn-cta-inner {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 46px;
+          height: 46px;
+          border-radius: 14px;
+          background: #C8F04B;
+          color: #0E0F14;
+          box-shadow: 0 4px 16px rgba(200,240,75,0.4);
+          transition: transform 140ms ease, box-shadow 140ms ease;
+        }
+        .sc-bn-cta:active .sc-bn-cta-inner {
+          transform: scale(0.94);
+          box-shadow: 0 2px 8px rgba(200,240,75,0.3);
+        }
+
+        /* Выдвижной ящик "Ещё" на мобилке */
+        .sc-drawer {
+          position: fixed;
+          inset: 0;
+          z-index: 9995;
+        }
+        .sc-drawer-backdrop {
+          position: absolute;
+          inset: 0;
+          background: rgba(0,0,0,0.6);
+          backdrop-filter: blur(4px);
+        }
+        .sc-drawer-panel {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          background: #181920;
+          border-top: 1px solid rgba(255,255,255,0.08);
+          border-radius: 20px 20px 0 0;
+          padding: 12px 16px 32px;
+          padding-bottom: calc(32px + env(safe-area-inset-bottom));
+        }
+        .sc-drawer-handle {
+          width: 36px;
+          height: 4px;
+          border-radius: 2px;
+          background: rgba(255,255,255,0.15);
+          margin: 0 auto 20px;
+        }
       `}</style>
 
-      {/* 📱 МОБИЛЬНАЯ ШАПКА (Скрыта на ПК) */}
-      <div 
-        className="sc-sidebar md:hidden flex items-center justify-between px-5 h-16 shrink-0 w-full z-40"
-        style={{ background: "var(--sb-bg)", borderBottom: "1px solid var(--sb-border)" }}
-      >
-        <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "6px" }}>
-          <div style={{ fontSize: "18px", fontWeight: 800, color: "var(--sb-text-hi)", letterSpacing: "-0.02em" }}>
-            Smart <span className="sc-logo-accent">City</span>
-          </div>
-        </Link>
-        <button 
-          onClick={() => setIsOpen(true)}
-          style={{ color: "var(--sb-text-hi)", background: "transparent", border: "none", cursor: "pointer" }}
-        >
-          <IconMenu />
-        </button>
-      </div>
-
-      {/* 🌑 ЗАТЕМНЕНИЕ ФОНА НА МОБИЛКЕ ПРИ ОТКРЫТОМ МЕНЮ */}
-      {isOpen && (
-        <div 
-          className="fixed inset-0 z-[9998] md:hidden"
-          style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }}
-          onClick={() => setIsOpen(false)}
-        />
-      )}
-
-      {/* 💻 ОСНОВНОЙ САЙДБАР (Выдвижной на телефоне, фиксированный на ПК) */}
+      {/* ╔════════════════════════════════════════╗
+          ║  ДЕСКТОП: обычный боковой сайдбар      ║
+          ╚════════════════════════════════════════╝ */}
       <aside
-        className={`
-          sc-sidebar w-64 flex flex-col shrink-0
-          /* Адаптивность: на мобилках fixed и slide-анимация, на ПК relative */
-          fixed top-0 left-0 h-[100dvh] z-[9999] transition-transform duration-300 ease-in-out
-          ${isOpen ? "translate-x-0" : "-translate-x-full"}
-          md:relative md:translate-x-0 md:h-full
-        `}
+        className="sc-sidebar hidden md:flex w-64 flex-col shrink-0 h-full"
         style={{
           background: "var(--sb-bg)",
           borderRight: "1px solid var(--sb-border)",
         }}
       >
-        {/* ── ЛОГОТИП И ШАПКА САЙДБАРА ── */}
-        <div style={{ padding: "24px 20px 20px", borderBottom: "1px solid var(--sb-border)", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-          <Link href="/" style={{ textDecoration: "none", display: "block" }} onClick={() => setIsOpen(false)}>
-            <div style={{
-              fontSize: "18px",
-              fontWeight: 800,
-              color: "var(--sb-text-hi)",
-              letterSpacing: "-0.02em",
-              lineHeight: 1.2,
-            }}>
-              Smart{" "}
-              <span className="sc-logo-accent">City</span>
+        {/* Логотип */}
+        <div style={{ padding: "24px 20px 20px", borderBottom: "1px solid var(--sb-border)" }}>
+          <Link href="/" style={{ textDecoration: "none", display: "block" }}>
+            <div style={{ fontSize: "18px", fontWeight: 800, color: "var(--sb-text-hi)", letterSpacing: "-0.02em", lineHeight: 1.2 }}>
+              Smart <span className="sc-logo-accent">City</span>
             </div>
-            <div style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "5px",
-              marginTop: "5px",
-            }}>
-              <span style={{
-                width: "6px", height: "6px",
-                borderRadius: "50%",
-                background: "var(--sb-accent)",
-                display: "inline-block",
-                flexShrink: 0,
-              }} />
-              <span style={{ fontSize: "11.5px", color: "var(--sb-text-lo)", letterSpacing: "0.04em" }}>
-                Петропавловск
-              </span>
+            <div style={{ display: "flex", alignItems: "center", gap: "5px", marginTop: "5px" }}>
+              <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "var(--sb-accent)", display: "inline-block", flexShrink: 0 }} />
+              <span style={{ fontSize: "11.5px", color: "var(--sb-text-lo)", letterSpacing: "0.04em" }}>Петропавловск</span>
             </div>
           </Link>
-
-          {/* Кнопка закрытия (крестик) только для мобилок */}
-          <button 
-            className="md:hidden"
-            onClick={() => setIsOpen(false)}
-            style={{ color: "var(--sb-text-mid)", background: "transparent", border: "none", cursor: "pointer", padding: "0" }}
-          >
-            <IconClose />
-          </button>
         </div>
 
-        {/* ── ОСНОВНАЯ НАВИГАЦИЯ ── */}
+        {/* Основная навигация */}
         <nav className="flex-1 overflow-y-auto" style={{ padding: "16px 12px", display: "flex", flexDirection: "column", gap: "2px" }}>
-          <div className="sc-section-label" style={{ marginBottom: "8px", marginTop: "4px" }}>
-            Навигация
-          </div>
-
-          {navItems.map((item) => {
+          <div className="sc-section-label" style={{ marginBottom: "8px", marginTop: "4px" }}>Навигация</div>
+          {sidebarNavItems.map((item) => {
             const isActive = pathname === item.href;
-
             if (item.href === "/issue") {
               return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setIsOpen(false)} // Закрываем при клике
-                  className="sc-cta-item"
-                  style={{ marginTop: "8px" }}
-                >
-                  {item.icon}
-                  {item.label}
+                <Link key={item.href} href={item.href} className="sc-cta-item" style={{ marginTop: "8px" }}>
+                  {item.icon}{item.label}
                 </Link>
               );
             }
-
             return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setIsOpen(false)} // Закрываем при клике
-                className={`sc-nav-item${isActive ? " active" : ""}`}
-              >
-                {item.icon}
-                {item.label}
+              <Link key={item.href} href={item.href} className={`sc-nav-item${isActive ? " active" : ""}`}>
+                {item.icon}{item.label}
               </Link>
             );
           })}
         </nav>
 
-        {/* ── НИЖНЯЯ НАВИГАЦИЯ (Профиль / Админ) ── */}
-        <div style={{
-          padding: "12px",
-          borderTop: "1px solid var(--sb-border)",
-          display: "flex",
-          flexDirection: "column",
-          gap: "2px",
-        }}>
-          <div className="sc-section-label" style={{ marginBottom: "6px" }}>
-            Аккаунт
-          </div>
-
+        {/* Нижняя навигация */}
+        <div style={{ padding: "12px", borderTop: "1px solid var(--sb-border)", display: "flex", flexDirection: "column", gap: "2px" }}>
+          <div className="sc-section-label" style={{ marginBottom: "6px" }}>Аккаунт</div>
           {bottomItems.map((item) => {
             const isActive = pathname === item.href;
             return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setIsOpen(false)} // Закрываем при клике
-                className={`sc-bottom-item${isActive ? " active" : ""}`}
-              >
-                {item.icon}
-                {item.label}
+              <Link key={item.href} href={item.href} className={`sc-bottom-item${isActive ? " active" : ""}`}>
+                {item.icon}{item.label}
               </Link>
             );
           })}
         </div>
       </aside>
+
+      {/* ╔════════════════════════════════════════╗
+          ║  МОБИЛКА: нижняя навбара               ║
+          ╚════════════════════════════════════════╝ */}
+      {/* ИЗМЕНЕНО: Добавлен класс flex, так как мы убрали его из CSS */}
+      <nav className="sc-bottom-nav sc-sidebar flex md:hidden">
+        {navItems.map((item) => {
+          const isActive = pathname === item.href;
+
+          if (item.cta) {
+            return (
+              <Link key={item.href} href={item.href} className="sc-bn-cta">
+                <div className="sc-bn-cta-inner">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 5v14M5 12h14"/>
+                  </svg>
+                </div>
+              </Link>
+            );
+          }
+
+          return (
+            <Link key={item.href} href={item.href} className={`sc-bn-item${isActive ? " active" : ""}`}>
+              {item.icon}
+              <span>{item.label}</span>
+            </Link>
+          );
+        })}
+
+        {/* Кнопка "Ещё" — открывает drawer с профилем и админом */}
+        <button
+          onClick={() => setDrawerOpen(true)}
+          className={`sc-bn-item${drawerOpen ? " active" : ""}`}
+          style={{ background: "transparent", border: "none", cursor: "pointer", fontFamily: "inherit" }}
+        >
+          <IconMore />
+          <span>Ещё</span>
+        </button>
+      </nav>
+
+      {/* ╔════════════════════════════════════════╗
+          ║  МОБИЛКА: drawer "Ещё"                 ║
+          ╚════════════════════════════════════════╝ */}
+      {drawerOpen && (
+        <div className="sc-drawer sc-sidebar md:hidden">
+          <div className="sc-drawer-backdrop" onClick={() => setDrawerOpen(false)} />
+          <div className="sc-drawer-panel">
+            <div className="sc-drawer-handle" />
+
+            {/* Лого в drawer */}
+            <div style={{ marginBottom: "16px", paddingLeft: "4px" }}>
+              <div style={{ fontSize: "16px", fontWeight: 800, color: "var(--sb-text-hi)", letterSpacing: "-0.02em" }}>
+                Smart <span className="sc-logo-accent">City</span>
+              </div>
+              <div style={{ fontSize: "11px", color: "var(--sb-text-lo)", marginTop: "3px" }}>Петропавловск</div>
+            </div>
+
+            <div className="sc-section-label" style={{ marginBottom: "10px" }}>Аккаунт</div>
+
+            {bottomItems.map((item) => {
+              const isActive = pathname === item.href;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setDrawerOpen(false)}
+                  className={`sc-bottom-item${isActive ? " active" : ""}`}
+                  style={{ fontSize: "15px", padding: "12px 12px" }}
+                >
+                  {item.icon}{item.label}
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </>
   );
 }
