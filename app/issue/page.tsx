@@ -145,12 +145,25 @@ export default function IssuePage() {
                 Фотография проблемы
               </label>
               <div className="h-48 w-full rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 flex flex-col items-center justify-center relative hover:bg-gray-100 transition-colors">
-                <input 
-                  type="file" 
-                  accept="image/*"
-                  onChange={(e) => setPhoto(e.target.files?.[0] || null)}
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                />
+                <input
+  type="file"
+  accept="image/*"
+  // ВОТ ЭТА МАГИЯ: заставляет телефон открыть заднюю (основную) камеру
+  capture="environment" 
+  onChange={(e) => handleImageUpload(e)}
+  className="hidden" // Скрываем стандартный страшный инпут
+  id="photo-upload"
+/>
+
+{/* Красивая кнопка, которая вызывает инпут */}
+<label 
+  htmlFor="photo-upload" 
+  className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-2xl bg-gray-50 cursor-pointer active:bg-gray-100 transition-colors"
+>
+  <span className="text-3xl mb-2">📸</span>
+  <span className="text-sm font-bold text-gray-600">Сделать фото</span>
+  <span className="text-xs text-gray-400 mt-1">или выбрать из галереи</span>
+</label>
                 {photo ? (
                   <div className="text-center p-4">
                     <span className="text-4xl">🖼️</span>
