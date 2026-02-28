@@ -9,22 +9,29 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  
+  // ДОБАВЛЕНО: Состояние для переключения режимов. 
+  // true = Регистрация по умолчанию, false = Вход
+  const [isSignUp, setIsSignUp] = useState(true); 
   const router = useRouter();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  // Единый обработчик для отправки формы
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) alert(error.message);
-    else router.push("/profile");
-    setLoading(false);
-  };
 
-  const handleSignUp = async () => {
-    setLoading(true);
-    const { error } = await supabase.auth.signUp({ email, password });
-    if (error) alert(error.message);
-    else alert("Проверьте почту для подтверждения!");
+    if (isSignUp) {
+      // Логика РЕГИСТРАЦИИ
+      const { error } = await supabase.auth.signUp({ email, password });
+      if (error) alert(error.message);
+      else alert("Проверьте почту для подтверждения!");
+    } else {
+      // Логика ВХОДА
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) alert(error.message);
+      else router.push("/profile");
+    }
+    
     setLoading(false);
   };
 
@@ -64,14 +71,16 @@ export default function LoginPage() {
             className="text-3xl font-bold"
             style={{ fontFamily: "var(--font-display)", color: "var(--text-primary)" }}
           >
-            Добро пожаловать
+            {/* Динамический заголовок */}
+            {isSignUp ? "Регистрация" : "С возвращением"}
           </h1>
           <p className="text-sm mt-2" style={{ color: "var(--text-muted)" }}>
-            Войдите, чтобы продолжить
+            {/* Динамическая подсказка */}
+            {isSignUp ? "Создайте аккаунт для работы с картой" : "Войдите, чтобы продолжить"}
           </p>
         </div>
 
-        <form onSubmit={handleLogin} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="email" placeholder="Email" required
             style={inputBase}
@@ -99,19 +108,22 @@ export default function LoginPage() {
             onMouseEnter={(e) => { if (!loading) (e.currentTarget as HTMLElement).style.opacity = "0.88"; }}
             onMouseLeave={(e) => { if (!loading) (e.currentTarget as HTMLElement).style.opacity = "1"; }}
           >
-            {loading ? "Загрузка..." : "Войти"}
+            {/* Динамический текст кнопки */}
+            {loading ? "Загрузка..." : (isSignUp ? "Зарегистрироваться" : "Войти")}
           </button>
         </form>
 
         <div className="mt-4 pt-4 text-center" style={{ borderTop: "1px solid rgba(100,70,40,0.08)" }}>
+          {/* Кнопка переключения режимов */}
           <button
-            onClick={handleSignUp}
+            type="button"
+            onClick={() => setIsSignUp(!isSignUp)}
             className="text-sm font-medium transition-colors"
             style={{ color: "var(--text-muted)", background: "none", border: "none", cursor: "pointer" }}
             onMouseEnter={(e) => ((e.target as HTMLElement).style.color = "var(--accent-amber)")}
             onMouseLeave={(e) => ((e.target as HTMLElement).style.color = "var(--text-muted)")}
           >
-            Нет аккаунта? Зарегистрироваться
+            {isSignUp ? "Уже есть аккаунт? Войти" : "Нет аккаунта? Зарегистрироваться"}
           </button>
         </div>
       </div>

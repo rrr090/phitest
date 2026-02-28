@@ -36,7 +36,7 @@ interface DigestResult {
 const GROQ_API_KEY = process.env.NEXT_PUBLIC_GROQ_API_KEY ?? "";
 const GROQ_MODEL   = "openai/gpt-oss-120b";
 
-// ─── СТИЛИ (оставил без изменений) ────────────────────────────────────────────
+// ─── СТИЛИ ────────────────────────────────────────────────────────────────────
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=JetBrains+Mono:wght@400;600;700&display=swap');
 
@@ -219,7 +219,6 @@ export default function NewsPage() {
   useEffect(() => {
     async function loadInitialData() {
       try {
-        // Грузим заявки
         const { data: issuesData } = await supabase
           .from("issues")
           .select("id,title,category,status,address,lat,lng,created_at,likes_count")
@@ -228,7 +227,6 @@ export default function NewsPage() {
         
         if (issuesData) setIssues(issuesData as Issue[]);
 
-        // Грузим последний сгенерированный дайджест
         const { data: latestDigest } = await supabase
           .from("news_digests")
           .select("*")
@@ -253,7 +251,7 @@ export default function NewsPage() {
     loadInitialData();
   }, []);
 
-  // 2. Генерация через Groq и СОХРАНЕНИЕ в БД
+  // 2. Генерация через Groq, СОХРАНЕНИЕ в БД и ОТПРАВКА в Telegram
   const generate = useCallback(async () => {
     if (!hasKey) { setError("Укажите NEXT_PUBLIC_GROQ_API_KEY в .env.local"); return; }
     if (!issues.length) { setError("Нет данных. Добавьте хотя бы одну заявку."); return; }
@@ -296,6 +294,29 @@ export default function NewsPage() {
         .single();
 
       if (dbError) throw new Error("ИИ сгенерировал текст, но не удалось сохранить в базу.");
+
+      // ─── ОТПРАВКА В TELEGRAM ───
+      try {
+        let tgMessage = `🏙 <b>Городская ИИ-сводка: Петропавловск</b>\n\n`;
+        tgMessage += `<i>${parsed.summary}</i>\n\n`;
+        
+        parsed.articles.forEach(art => {
+          tgMessage += `${art.emoji} <b>${art.headline}</b>\n`;
+          tgMessage += `${art.body}\n\n`;
+        });
+        
+        tgMessage += `<a href="${window.location.origin}/news">Читать подробнее на портале Smart City</a>`;
+
+        await fetch("/api/telegram", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: tgMessage })
+        });
+      } catch (tgError) {
+        console.error("Ошибка при отправке в Telegram:", tgError);
+        // Не прерываем выполнение, чтобы обновить UI даже если Telegram упал
+      }
+      // ───────────────────────────
 
       // ОБНОВЛЯЕМ СТЕЙТ
       setDigest({ 

@@ -61,13 +61,11 @@ export default function CommentSection({ issueId }: CommentSectionProps) {
     let imageUrl = null;
 
     try {
-      // 1. Если есть фото — грузим его в Storage
       if (image) {
         const fileExt = image.name.split('.').pop();
         const fileName = `${Math.random()}.${fileExt}`;
         const filePath = `${userId}/${fileName}`;
 
-        // ВАЖНО: замени 'comment_images' на название своего бакета
         const { error: uploadError } = await supabase.storage
           .from("comment_images")
           .upload(filePath, image);
@@ -81,7 +79,6 @@ export default function CommentSection({ issueId }: CommentSectionProps) {
         imageUrl = publicUrlData.publicUrl;
       }
 
-      // 2. Сохраняем комментарий в базу
       const { data, error } = await supabase
         .from("comments")
         .insert([
@@ -92,7 +89,6 @@ export default function CommentSection({ issueId }: CommentSectionProps) {
 
       if (error) throw error;
 
-      // 3. Обновляем UI
       setComments([...comments, data]);
       setText("");
       setImage(null);
@@ -107,60 +103,68 @@ export default function CommentSection({ issueId }: CommentSectionProps) {
   };
 
   return (
-    <div className="mt-8 bg-white md:bg-gray-50 md:rounded-2xl md:p-6 border-t md:border border-gray-100">
-      <h3 className="text-lg font-black text-gray-900 mb-6 px-4 md:px-0">Обсуждение ({comments.length})</h3>
+    <div className="bg-[#181920] rounded-[24px] shadow-2xl border border-white/5 p-6 md:p-10" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+      <h3 className="text-sm font-black text-[#8B8E9E] uppercase tracking-widest mb-6">
+        Обсуждение <span className="text-[#C8F04B]">({comments.length})</span>
+      </h3>
 
       {/* Список комментариев */}
-      <div className="space-y-4 mb-6 px-4 md:px-0">
+      <div className="space-y-4 mb-8">
         {comments.map((comment) => (
-          <div key={comment.id} className="bg-gray-50 md:bg-white p-4 rounded-2xl border border-gray-100">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs">
-                {/* Заглушка аватарки */}
+          <div key={comment.id} className="bg-white/5 p-5 rounded-2xl border border-white/5 hover:border-white/10 transition-colors">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-8 h-8 rounded-full bg-[#C8F04B]/20 flex items-center justify-center text-[#C8F04B] font-bold text-xs border border-[#C8F04B]/30">
                 ID
               </div>
-              <span className="text-xs text-gray-400">
+              <span className="text-xs text-[#4E5162] font-medium tracking-wider">
                 {new Date(comment.created_at).toLocaleDateString("ru-RU", { hour: '2-digit', minute: '2-digit' })}
               </span>
             </div>
             
-            {comment.text && <p className="text-sm text-gray-700 whitespace-pre-wrap mb-3">{comment.text}</p>}
+            {comment.text && (
+              <p className="text-sm text-[#F0F1F5] leading-relaxed whitespace-pre-wrap mb-3 opacity-90">
+                {comment.text}
+              </p>
+            )}
             
             {comment.image_url && (
               <img 
                 src={comment.image_url} 
                 alt="Фото к комментарию" 
-                className="rounded-xl max-h-48 object-cover border border-gray-200"
+                className="rounded-xl max-h-56 object-cover border border-white/10"
               />
             )}
           </div>
         ))}
         {comments.length === 0 && (
-          <p className="text-sm text-gray-400 text-center py-4">Пока нет комментариев. Напишите первым!</p>
+          <div className="py-10 text-center border border-dashed border-white/10 rounded-2xl">
+            <span className="text-3xl mb-3 block opacity-30 grayscale">💬</span>
+            <p className="text-sm text-[#4E5162] font-medium uppercase tracking-widest">Пока нет комментариев</p>
+          </div>
         )}
       </div>
 
       {/* Форма ввода (видна только авторизованным) */}
       {userId ? (
-        <form onSubmit={handleSubmit} className="relative px-4 md:px-0">
+        <form onSubmit={handleSubmit} className="relative">
           {/* Превью выбранного фото */}
           {imagePreview && (
-            <div className="relative inline-block mb-3">
-              <img src={imagePreview} alt="Preview" className="h-20 rounded-lg border border-gray-200" />
+            <div className="relative inline-block mb-4">
+              <img src={imagePreview} alt="Preview" className="h-24 rounded-xl border border-white/20 shadow-lg object-cover" />
               <button 
                 type="button" 
                 onClick={() => { setImage(null); setImagePreview(null); }}
-                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md"
+                className="absolute -top-3 -right-3 bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5 shadow-md transition-colors"
               >
-                <X className="w-3 h-3" />
+                <X className="w-4 h-4" />
               </button>
             </div>
           )}
 
-          <div className="flex items-end gap-2 bg-white rounded-2xl border border-gray-200 p-2 shadow-sm focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
+          <div className="flex items-end gap-2 bg-[#0E0F14] rounded-2xl border border-white/10 p-2 focus-within:border-[#C8F04B]/50 focus-within:ring-1 focus-within:ring-[#C8F04B]/30 transition-all shadow-inner">
             
             {/* Кнопка загрузки фото */}
-            <label className="p-2 text-gray-400 hover:text-blue-600 cursor-pointer transition-colors shrink-0">
+            <label className="p-3 text-[#4E5162] hover:text-[#C8F04B] cursor-pointer transition-colors shrink-0 rounded-xl hover:bg-white/5">
               <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
               <ImagePlus className="w-6 h-6" />
             </label>
@@ -169,8 +173,8 @@ export default function CommentSection({ issueId }: CommentSectionProps) {
             <textarea
               value={text}
               onChange={(e) => setText(e.target.value)}
-              placeholder="Добавить комментарий..."
-              className="flex-1 max-h-32 min-h-[44px] resize-none outline-none py-2 text-sm text-gray-800 bg-transparent"
+              placeholder="Написать комментарий..."
+              className="flex-1 max-h-32 min-h-[48px] resize-none outline-none py-3 px-2 text-sm text-[#F0F1F5] placeholder-[#4E5162] bg-transparent"
               rows={1}
             />
 
@@ -178,14 +182,14 @@ export default function CommentSection({ issueId }: CommentSectionProps) {
             <button
               type="submit"
               disabled={isSubmitting || (!text.trim() && !image)}
-              className="p-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:bg-gray-200 disabled:text-gray-400 transition-all shrink-0"
+              className="p-3 bg-[#C8F04B] text-[#0E0F14] rounded-xl hover:bg-[#d9ff5e] disabled:bg-white/5 disabled:text-[#4E5162] transition-all shrink-0 shadow-[0_4px_16px_rgba(200,240,75,0.15)] disabled:shadow-none"
             >
               {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
             </button>
           </div>
         </form>
       ) : (
-        <div className="px-4 md:px-0 text-center p-4 bg-gray-50 rounded-xl border border-gray-100 text-sm text-gray-500">
+        <div className="text-center p-5 bg-white/5 rounded-2xl border border-white/5 text-xs text-[#8B8E9E] font-bold uppercase tracking-widest">
           Войдите в систему, чтобы оставить комментарий
         </div>
       )}

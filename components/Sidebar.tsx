@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import Image from "next/image"; // <-- Добавь эту строку вверху
 
 // ─── НАВИГАЦИЯ ───────────────────────────────────────────────────────────────
 
@@ -22,8 +23,8 @@ const drawerNavItems = [
 // Для десктопного сайдбара (все элементы списком)
 const sidebarNavItems = [
   { href: "/",           icon: <IconMap />,      label: "Карта"          },
-  { href: "/feed",       icon: <IconFeed />,     label: "Лента проблем"  },
-  { href: "/news",       icon: <IconNews />,     label: "ИИ-новости"     }, // НОВАЯ ВКЛАДКА
+  { href: "/feed",       icon: <IconFeed />,     label: "Лента сигналов"  },
+  { href: "/news",       icon: <IconNews />,     label: "ИИ-новости"     },
   { href: "/categories", icon: <IconCatalog />,  label: "Каталог"        },
   { href: "/ratings",    icon: <IconRating />,   label: "Рейтинг"        },
   { href: "/issue",      icon: <IconIssue />,    label: "Новый сигнал"   },
@@ -356,9 +357,15 @@ export default function Sidebar() {
       >
         <div style={{ padding: "24px 20px 20px", borderBottom: "1px solid var(--sb-border)" }}>
           <Link href="/" style={{ textDecoration: "none", display: "block" }}>
-            <div style={{ fontSize: "18px", fontWeight: 800, color: "var(--sb-text-hi)", letterSpacing: "-0.02em", lineHeight: 1.2 }}>
-              Smart <span className="sc-logo-accent">City</span>
-            </div>
+           <div className="relative w-[250px] h-[70px] md:w-[350px] md:h-[80px]">
+  <Image 
+    src="/13logo.png" 
+    alt="Smart City Logo" 
+    fill 
+    className="object-contain object-left"
+    priority
+  />
+</div>
             <div style={{ display: "flex", alignItems: "center", gap: "5px", marginTop: "5px" }}>
               <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "var(--sb-accent)", display: "inline-block", flexShrink: 0 }} />
               <span style={{ fontSize: "11.5px", color: "var(--sb-text-lo)", letterSpacing: "0.04em" }}>Петропавловск</span>
