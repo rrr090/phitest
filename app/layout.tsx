@@ -3,7 +3,7 @@ import Sidebar from "@/components/Sidebar";
 import "./globals.css";
 
 export const metadata = {
-  title: "Smart City Петропавловск",
+  title: "Signal - Smart City",
   description: "Платформа для мониторинга городских проблем",
 };
 

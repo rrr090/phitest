@@ -2,11 +2,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import Image from "next/image"; // <-- Добавь эту строку вверху
+import Image from "next/image";
 
 // ─── НАВИГАЦИЯ ───────────────────────────────────────────────────────────────
 
-// Для мобильной нижней панели (максимум 4-5 элементов для удобства)
 const navItems = [
   { href: "/",       icon: <IconMap />,      label: "Карта"        },
   { href: "/feed",   icon: <IconFeed />,     label: "Лента"        },
@@ -14,13 +13,11 @@ const navItems = [
   { href: "/news",   icon: <IconNews />,     label: "Новости"      },
 ];
 
-// Дополнительные разделы для мобилки (спрятаны под кнопкой "Ещё")
 const drawerNavItems = [
   { href: "/categories", icon: <IconCatalog />,  label: "Каталог" },
   { href: "/ratings",    icon: <IconRating />,   label: "Рейтинг" },
 ];
 
-// Для десктопного сайдбара (все элементы списком)
 const sidebarNavItems = [
   { href: "/",           icon: <IconMap />,      label: "Карта"          },
   { href: "/feed",       icon: <IconFeed />,     label: "Лента сигналов"  },
@@ -30,7 +27,6 @@ const sidebarNavItems = [
   { href: "/issue",      icon: <IconIssue />,    label: "Новый сигнал"   },
 ];
 
-// Аккаунт (одинаково для всех)
 const bottomItems = [
   { href: "/profile", icon: <IconProfile />, label: "Личный кабинет" },
   { href: "/admin",   icon: <IconAdmin />,   label: "Админ-панель"   },
@@ -39,8 +35,7 @@ const bottomItems = [
 // ─── SVG ИКОНКИ ──────────────────────────────────────────────────────────────
 function IconMap() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/>
       <line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/>
     </svg>
@@ -48,8 +43,7 @@ function IconMap() {
 }
 function IconFeed() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/>
       <circle cx="5" cy="19" r="1" fill="currentColor"/>
     </svg>
@@ -57,8 +51,7 @@ function IconFeed() {
 }
 function IconCatalog() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <rect x="3" y="3" width="7" height="7" rx="1.5"/>
       <rect x="14" y="3" width="7" height="7" rx="1.5"/>
       <rect x="14" y="14" width="7" height="7" rx="1.5"/>
@@ -68,25 +61,21 @@ function IconCatalog() {
 }
 function IconRating() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
     </svg>
   );
 }
 function IconIssue() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d="M12 5v14M5 12h14"/>
     </svg>
   );
 }
-// Новая иконка для новостей
 function IconNews() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/>
       <path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6Z"/>
     </svg>
@@ -94,16 +83,14 @@ function IconNews() {
 }
 function IconProfile() {
   return (
-    <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
     </svg>
   );
 }
 function IconAdmin() {
   return (
-    <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="12" cy="12" r="3"/>
       <path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>
     </svg>
@@ -111,11 +98,19 @@ function IconAdmin() {
 }
 function IconMore() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="12" cy="5" r="1" fill="currentColor"/>
       <circle cx="12" cy="12" r="1" fill="currentColor"/>
       <circle cx="12" cy="19" r="1" fill="currentColor"/>
+    </svg>
+  );
+}
+// Новая иконка Telegram
+function IconTelegram() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M22 2L11 13" />
+      <path d="M22 2l-7 20-4-9-9-4 20-7z" />
     </svg>
   );
 }
@@ -142,16 +137,6 @@ export default function Sidebar() {
           --sb-trans:       160ms ease;
         }
         .sc-sidebar * { box-sizing: border-box; }
-
-        .sc-logo-accent {
-          display: inline-block;
-          background: var(--sb-accent);
-          color: var(--sb-bg);
-          border-radius: 6px;
-          padding: 0 5px;
-          line-height: 1.35;
-          font-weight: 800;
-        }
 
         .sc-nav-item {
           display: flex;
@@ -357,18 +342,14 @@ export default function Sidebar() {
       >
         <div style={{ padding: "24px 20px 20px", borderBottom: "1px solid var(--sb-border)" }}>
           <Link href="/" style={{ textDecoration: "none", display: "block" }}>
-           <div className="relative w-[250px] h-[70px] md:w-[350px] md:h-[80px]">
-  <Image 
-    src="/13logo.png" 
-    alt="Smart City Logo" 
-    fill 
-    className="object-contain object-left"
-    priority
-  />
-</div>
-            <div style={{ display: "flex", alignItems: "center", gap: "5px", marginTop: "5px" }}>
-              <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "var(--sb-accent)", display: "inline-block", flexShrink: 0 }} />
-              <span style={{ fontSize: "11.5px", color: "var(--sb-text-lo)", letterSpacing: "0.04em" }}>Петропавловск</span>
+            <div className="relative w-[250px] h-[70px] md:w-[350px] md:h-[80px] -ml-2">
+              <Image 
+                src="/13logo.png" 
+                alt="Smart City Logo" 
+                fill 
+                className="object-contain object-left"
+                priority
+              />
             </div>
           </Link>
         </div>
@@ -390,6 +371,18 @@ export default function Sidebar() {
               </Link>
             );
           })}
+          
+          {/* Ссылка на Telegram Бот в десктопе */}
+          <div className="sc-section-label" style={{ marginBottom: "8px", marginTop: "16px" }}>Сообщество</div>
+          <a 
+            href="https://t.me/+FWzbtky6_uRiNDEy" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="sc-nav-item hover:text-[#0088cc] transition-colors"
+          >
+            <IconTelegram />
+            Telegram Бот
+          </a>
         </nav>
 
         <div style={{ padding: "12px", borderTop: "1px solid var(--sb-border)", display: "flex", flexDirection: "column", gap: "2px" }}>
@@ -416,8 +409,7 @@ export default function Sidebar() {
             return (
               <Link key={item.href} href={item.href} className="sc-bn-cta">
                 <div className="sc-bn-cta-inner">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M12 5v14M5 12h14"/>
                   </svg>
                 </div>
@@ -452,11 +444,16 @@ export default function Sidebar() {
           <div className="sc-drawer-panel">
             <div className="sc-drawer-handle" />
 
-            <div style={{ marginBottom: "20px", paddingLeft: "4px" }}>
-              <div style={{ fontSize: "16px", fontWeight: 800, color: "var(--sb-text-hi)", letterSpacing: "-0.02em" }}>
-                Smart <span className="sc-logo-accent">City</span>
+            {/* Логотип в мобильном меню */}
+            <div style={{ marginBottom: "20px", paddingLeft: "16px" }}>
+              <div className="relative w-[180px] h-[50px] -ml-2">
+                <Image 
+                  src="/13logo.png" 
+                  alt="Smart City Logo" 
+                  fill 
+                  className="object-contain object-left"
+                />
               </div>
-              <div style={{ fontSize: "11px", color: "var(--sb-text-lo)", marginTop: "3px" }}>Петропавловск</div>
             </div>
 
             {/* Второстепенные разделы навигации */}
@@ -475,6 +472,19 @@ export default function Sidebar() {
                 </Link>
               );
             })}
+
+            {/* Ссылка на Telegram Бот в мобилке */}
+            <div className="sc-section-label" style={{ marginBottom: "10px", marginTop: "16px" }}>Сообщество</div>
+            <a 
+              href="https://t.me/+FWzbtky6_uRiNDEy"
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="sc-bottom-item hover:text-[#0088cc] transition-colors"
+              style={{ fontSize: "15px", padding: "12px 12px", marginBottom: "4px" }}
+            >
+              <IconTelegram />
+              Telegram Бот
+            </a>
 
             {/* Аккаунт */}
             <div className="sc-section-label" style={{ marginBottom: "10px", marginTop: "16px" }}>Аккаунт</div>
