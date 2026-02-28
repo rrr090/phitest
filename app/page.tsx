@@ -35,44 +35,46 @@ export default function Home() {
   }, [activeCategory, activeStatus, issues]);
 
   return (
-    <div className="relative h-full w-full">
+    <div className="relative h-full w-full bg-[#0E0F14]">
+      {/* Подключаем шрифт, если он не подключен глобально */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&display=swap');
+      `}} />
 
       {/* ── ПАНЕЛЬ ФИЛЬТРОВ ── */}
-      <div className="
-        absolute z-[1000]
-        /* Мобилка: снизу, над bottom-nav (bottom-0, учитываем pb через safe-area) */
-        bottom-0 left-0 right-0
-        /* ПК: сверху по центру */
-        md:bottom-auto md:top-4 md:left-1/2 md:-translate-x-1/2 md:w-[90%] md:max-w-2xl
-      ">
+      <div 
+        className="
+          absolute z-[1000]
+          bottom-0 left-0 right-0
+          md:bottom-auto md:top-4 md:left-1/2 md:-translate-x-1/2 md:w-[90%] md:max-w-2xl
+        "
+        style={{ fontFamily: "'JetBrains Mono', monospace" }}
+      >
         <div className="
-          bg-white/90 md:bg-white/80 backdrop-blur-md
-          px-4 pt-3 pb-4
-          /* Мобилка: скруглены только верхние углы + safe area снизу */
-          rounded-t-2xl md:rounded-3xl
-          shadow-2xl border border-white/20
-          /* Мобилка: горизонтальная прокрутка для категорий + вертикальный layout */
-          space-y-2 md:space-y-3
+          bg-[#181920]/90 backdrop-blur-xl
+          px-4 pt-3 pb-6 md:pb-4
+          rounded-t-3xl md:rounded-3xl
+          shadow-[0_8px_32px_rgba(0,0,0,0.5)] border border-white/10
+          space-y-3 md:space-y-4
         ">
           {/* Drag handle — только мобилка */}
-          <div className="flex justify-center md:hidden mb-1">
-            <div className="w-10 h-1 rounded-full bg-gray-300" />
+          <div className="flex justify-center md:hidden mb-2">
+            <div className="w-12 h-1.5 rounded-full bg-white/10" />
           </div>
 
           {/* Категории */}
-          <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+          <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
             {categories.map(cat => (
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
                 className={`
-                  px-3 py-1.5 md:px-4
-                  rounded-full text-xs font-bold transition-all whitespace-nowrap
-                  /* Чуть крупнее тап-зона на мобилке */
-                  min-h-[34px]
+                  px-4 py-2 md:px-5
+                  rounded-full text-[13px] md:text-sm transition-all whitespace-nowrap
+                  min-h-[36px]
                   ${activeCategory === cat
-                    ? "bg-blue-600 text-white shadow-lg shadow-blue-200"
-                    : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                    ? "bg-[#C8F04B] text-[#0E0F14] shadow-[0_4px_20px_rgba(200,240,75,0.25)] font-bold transform -translate-y-0.5"
+                    : "bg-white/5 text-[#8B8E9E] hover:bg-white/10 hover:text-[#F0F1F5] font-semibold"
                   }
                 `}
               >
@@ -82,15 +84,18 @@ export default function Home() {
           </div>
 
           {/* Статусы */}
-          <div className="flex gap-3 md:gap-4 border-t border-gray-100 pt-2 md:pt-3 overflow-x-auto no-scrollbar">
+          <div className="flex gap-4 md:gap-5 border-t border-white/10 pt-3 overflow-x-auto no-scrollbar">
             {statuses.map(stat => (
               <button
                 key={stat}
                 onClick={() => setActiveStatus(stat)}
                 className={`
-                  text-xs font-black uppercase tracking-widest transition-colors whitespace-nowrap
+                  text-[11px] md:text-xs font-extrabold uppercase tracking-[0.1em] transition-all whitespace-nowrap
                   min-h-[28px]
-                  ${activeStatus === stat ? "text-blue-600" : "text-gray-400 hover:text-gray-600"}
+                  ${activeStatus === stat 
+                    ? "text-[#C8F04B] drop-shadow-[0_0_8px_rgba(200,240,75,0.4)]" 
+                    : "text-[#4E5162] hover:text-[#8B8E9E]"
+                  }
                 `}
               >
                 {stat === "Все" ? "Все статусы" : stat}
