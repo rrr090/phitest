@@ -4,22 +4,32 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 // ─── НАВИГАЦИЯ ───────────────────────────────────────────────────────────────
+
+// Для мобильной нижней панели (максимум 4-5 элементов для удобства)
 const navItems = [
-  { href: "/",       icon: <IconMap />,      label: "Карта"         },
-  { href: "/feed",       icon: <IconFeed />,     label: "Лента"         },
-  { href: "/issue",      icon: <IconIssue />,    label: "Сигнал", cta: true },
-  { href: "/categories", icon: <IconCatalog />,  label: "Каталог"       },
-  { href: "/ratings",    icon: <IconRating />,   label: "Рейтинг"       },
+  { href: "/",       icon: <IconMap />,      label: "Карта"        },
+  { href: "/feed",   icon: <IconFeed />,     label: "Лента"        },
+  { href: "/issue",  icon: <IconIssue />,    label: "Сигнал", cta: true },
+  { href: "/news",   icon: <IconNews />,     label: "Новости"      },
 ];
 
+// Дополнительные разделы для мобилки (спрятаны под кнопкой "Ещё")
+const drawerNavItems = [
+  { href: "/categories", icon: <IconCatalog />,  label: "Каталог" },
+  { href: "/ratings",    icon: <IconRating />,   label: "Рейтинг" },
+];
+
+// Для десктопного сайдбара (все элементы списком)
 const sidebarNavItems = [
-  { href: "/",       icon: <IconMap />,      label: "Карта"          },
+  { href: "/",           icon: <IconMap />,      label: "Карта"          },
   { href: "/feed",       icon: <IconFeed />,     label: "Лента проблем"  },
+  { href: "/news",       icon: <IconNews />,     label: "ИИ-новости"     }, // НОВАЯ ВКЛАДКА
   { href: "/categories", icon: <IconCatalog />,  label: "Каталог"        },
   { href: "/ratings",    icon: <IconRating />,   label: "Рейтинг"        },
   { href: "/issue",      icon: <IconIssue />,    label: "Новый сигнал"   },
 ];
 
+// Аккаунт (одинаково для всех)
 const bottomItems = [
   { href: "/profile", icon: <IconProfile />, label: "Личный кабинет" },
   { href: "/admin",   icon: <IconAdmin />,   label: "Админ-панель"   },
@@ -71,6 +81,16 @@ function IconIssue() {
     </svg>
   );
 }
+// Новая иконка для новостей
+function IconNews() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/>
+      <path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6Z"/>
+    </svg>
+  );
+}
 function IconProfile() {
   return (
     <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
@@ -85,15 +105,6 @@ function IconAdmin() {
       stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="12" cy="12" r="3"/>
       <path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>
-    </svg>
-  );
-}
-function IconClose() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="18" y1="6" x2="6" y2="18"/>
-      <line x1="6" y1="6" x2="18" y2="18"/>
     </svg>
   );
 }
@@ -239,7 +250,6 @@ export default function Sidebar() {
           right: 0;
           height: 64px;
           z-index: 9990;
-          /* ИЗМЕНЕНО: удалено display: flex; чтобы Tailwind мог управлять видимостью */
           align-items: stretch;
           background: rgba(14,15,20,0.95);
           backdrop-filter: blur(16px);
@@ -344,7 +354,6 @@ export default function Sidebar() {
           borderRight: "1px solid var(--sb-border)",
         }}
       >
-        {/* Логотип */}
         <div style={{ padding: "24px 20px 20px", borderBottom: "1px solid var(--sb-border)" }}>
           <Link href="/" style={{ textDecoration: "none", display: "block" }}>
             <div style={{ fontSize: "18px", fontWeight: 800, color: "var(--sb-text-hi)", letterSpacing: "-0.02em", lineHeight: 1.2 }}>
@@ -357,7 +366,6 @@ export default function Sidebar() {
           </Link>
         </div>
 
-        {/* Основная навигация */}
         <nav className="flex-1 overflow-y-auto" style={{ padding: "16px 12px", display: "flex", flexDirection: "column", gap: "2px" }}>
           <div className="sc-section-label" style={{ marginBottom: "8px", marginTop: "4px" }}>Навигация</div>
           {sidebarNavItems.map((item) => {
@@ -377,7 +385,6 @@ export default function Sidebar() {
           })}
         </nav>
 
-        {/* Нижняя навигация */}
         <div style={{ padding: "12px", borderTop: "1px solid var(--sb-border)", display: "flex", flexDirection: "column", gap: "2px" }}>
           <div className="sc-section-label" style={{ marginBottom: "6px" }}>Аккаунт</div>
           {bottomItems.map((item) => {
@@ -394,7 +401,6 @@ export default function Sidebar() {
       {/* ╔════════════════════════════════════════╗
           ║  МОБИЛКА: нижняя навбара               ║
           ╚════════════════════════════════════════╝ */}
-      {/* ИЗМЕНЕНО: Добавлен класс flex, так как мы убрали его из CSS */}
       <nav className="sc-bottom-nav sc-sidebar flex md:hidden">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
@@ -420,7 +426,6 @@ export default function Sidebar() {
           );
         })}
 
-        {/* Кнопка "Ещё" — открывает drawer с профилем и админом */}
         <button
           onClick={() => setDrawerOpen(true)}
           className={`sc-bn-item${drawerOpen ? " active" : ""}`}
@@ -440,16 +445,32 @@ export default function Sidebar() {
           <div className="sc-drawer-panel">
             <div className="sc-drawer-handle" />
 
-            {/* Лого в drawer */}
-            <div style={{ marginBottom: "16px", paddingLeft: "4px" }}>
+            <div style={{ marginBottom: "20px", paddingLeft: "4px" }}>
               <div style={{ fontSize: "16px", fontWeight: 800, color: "var(--sb-text-hi)", letterSpacing: "-0.02em" }}>
                 Smart <span className="sc-logo-accent">City</span>
               </div>
               <div style={{ fontSize: "11px", color: "var(--sb-text-lo)", marginTop: "3px" }}>Петропавловск</div>
             </div>
 
-            <div className="sc-section-label" style={{ marginBottom: "10px" }}>Аккаунт</div>
+            {/* Второстепенные разделы навигации */}
+            <div className="sc-section-label" style={{ marginBottom: "10px" }}>Разделы</div>
+            {drawerNavItems.map((item) => {
+              const isActive = pathname === item.href;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setDrawerOpen(false)}
+                  className={`sc-bottom-item${isActive ? " active" : ""}`}
+                  style={{ fontSize: "15px", padding: "12px 12px", marginBottom: "4px" }}
+                >
+                  {item.icon}{item.label}
+                </Link>
+              );
+            })}
 
+            {/* Аккаунт */}
+            <div className="sc-section-label" style={{ marginBottom: "10px", marginTop: "16px" }}>Аккаунт</div>
             {bottomItems.map((item) => {
               const isActive = pathname === item.href;
               return (
